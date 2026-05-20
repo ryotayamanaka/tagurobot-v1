@@ -14,8 +14,8 @@ j3 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range
 j2 = servo.Servo(pca.channels[6], min_pulse=500, max_pulse=2500, actuation_range=180)
 
 print("両サーボを中立角度に移動します (組み立て姿勢)")
-print("J2 (ch6, 180度) -> 180度")
-j2.angle = 180
+print("J2 (ch6, 180度) -> 0度")
+j2.angle = 0
 print("J3 (ch0, 180度) -> 180度")
 j3.angle = 180
 
