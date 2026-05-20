@@ -13,17 +13,18 @@ j3 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range
 # J2: ch6, 180度サーボ
 j2 = servo.Servo(pca.channels[6], min_pulse=500, max_pulse=2500, actuation_range=180)
 
-# 中立角度
-J2_NEUTRAL = 140  # 180度サーボ
-J3_NEUTRAL = 90   # 180度サーボの物理中央
+# 中立角度 (組み立て姿勢: 両サーボとも物理端=180度)
+# 180度は物理限界のため、可動範囲は中立から負方向のみ
+J2_NEUTRAL = 180
+J3_NEUTRAL = 180
 
-# 可動範囲 (中立 ± 値)
-J2_RANGE = 30  # 110度〜170度
-J3_RANGE = 60  # 30度〜150度
+# 可動範囲 (中立からの最大変位量)
+J2_RANGE = 60  # 120度〜180度
+J3_RANGE = 90  # 90度〜180度
 
 
 def rest_position():
-    """休眠姿勢"""
+    """休眠姿勢 (組み立て位置)"""
     print("休眠姿勢へ")
     j3.angle = J3_NEUTRAL
     time.sleep(0.3)
@@ -32,14 +33,10 @@ def rest_position():
 
 
 def sweep_j2():
-    """J2 (中間関節) を可動範囲でスイープ"""
+    """J2 (中間関節) を可動範囲でスイープ (中立 -> 最遠 -> 中立)"""
     lo = J2_NEUTRAL - J2_RANGE
-    hi = J2_NEUTRAL + J2_RANGE
-    print(f"J2 スイープ ({lo}° → {hi}° → {J2_NEUTRAL}°)")
-    for angle in range(J2_NEUTRAL, hi + 1, 5):
-        j2.angle = angle
-        time.sleep(0.1)
-    for angle in range(hi, lo - 1, -5):
+    print(f"J2 スイープ ({J2_NEUTRAL}° → {lo}° → {J2_NEUTRAL}°)")
+    for angle in range(J2_NEUTRAL, lo - 1, -5):
         j2.angle = angle
         time.sleep(0.1)
     for angle in range(lo, J2_NEUTRAL + 1, 5):
@@ -48,14 +45,10 @@ def sweep_j2():
 
 
 def sweep_j3():
-    """J3 (先端関節) を可動範囲でスイープ"""
+    """J3 (先端関節) を可動範囲でスイープ (中立 -> 最遠 -> 中立)"""
     lo = J3_NEUTRAL - J3_RANGE
-    hi = J3_NEUTRAL + J3_RANGE
-    print(f"J3 スイープ ({lo}° → {hi}° → {J3_NEUTRAL}°)")
-    for angle in range(J3_NEUTRAL, hi + 1, 10):
-        j3.angle = angle
-        time.sleep(0.1)
-    for angle in range(hi, lo - 1, -10):
+    print(f"J3 スイープ ({J3_NEUTRAL}° → {lo}° → {J3_NEUTRAL}°)")
+    for angle in range(J3_NEUTRAL, lo - 1, -10):
         j3.angle = angle
         time.sleep(0.1)
     for angle in range(lo, J3_NEUTRAL + 1, 10):
@@ -64,21 +57,23 @@ def sweep_j3():
 
 
 def step_motion(cycles=3):
-    """歩行動作の模擬 (足を上げて前に出して下ろす)"""
+    """歩行動作の模擬 (足を上げて前に出して下ろす)
+    180度中立では負方向のみ動けるため、すべて中立より小さい角度で構成する。
+    """
     print(f"歩行動作シミュレーション ({cycles}回)")
     for i in range(cycles):
         print(f"  ステップ {i+1}/{cycles}")
-        # 足を持ち上げる (J3を曲げる)
-        j3.angle = J3_NEUTRAL - 30
+        # 足を持ち上げる (J3を中立から大きく曲げる)
+        j3.angle = J3_NEUTRAL - 60
         time.sleep(0.3)
-        # 前に出す (J2を前方へ)
-        j2.angle = J2_NEUTRAL - 20
+        # 前に出す (J2を中立から曲げる)
+        j2.angle = J2_NEUTRAL - 40
         time.sleep(0.3)
-        # 足を下ろす (J3を伸ばす)
-        j3.angle = J3_NEUTRAL + 20
+        # 足を下ろす (J3を中立寄りに戻す)
+        j3.angle = J3_NEUTRAL - 20
         time.sleep(0.3)
-        # 後ろに引く (J2を後方へ = 地面を蹴る)
-        j2.angle = J2_NEUTRAL + 20
+        # 後ろに引く (J2を中立寄りに戻す = 地面を蹴る)
+        j2.angle = J2_NEUTRAL - 10
         time.sleep(0.3)
         # 中立に戻す
         j3.angle = J3_NEUTRAL
