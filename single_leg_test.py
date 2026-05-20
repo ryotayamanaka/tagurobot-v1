@@ -13,35 +13,19 @@ j3 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range
 # J2: ch6, 180度サーボ
 j2 = servo.Servo(pca.channels[6], min_pulse=500, max_pulse=2500, actuation_range=180)
 
-# 中立角度 (組み立て姿勢)
-# J2 は 0度、J3 は 180度 で arm.stl に取り付ける構造
-# サーボは中立から物理限界(0/180)を超えない方向にのみ動かせる
-J2_NEUTRAL = 0
-J3_NEUTRAL = 180
+# 動作時の中立角度 (組み立て後、足がまっすぐ伸びた状態)
+# 組み立て時はホーンを J2=0度 / J3=180度 で取り付けるが、組み立て後の
+# 動作テストは 90度 中立 (両方向に対称に動かせる) を基準にする
+J2_NEUTRAL = 90
+J3_NEUTRAL = 90
 
-# 可動範囲 (中立から動かせる方向の最大変位量)
-# J2: 中立 0度 → 正方向のみ
-# J3: 中立 180度 → 負方向のみ
-J2_RANGE = 60   # 0度 〜 60度
-J3_RANGE = 90   # 90度 〜 180度
-
-# 各サーボの動かせる方向 (+1: 中立から正方向, -1: 中立から負方向)
-J2_DIR = +1
-J3_DIR = -1
-
-
-def _j2_angle(offset):
-    """中立からのオフセット(正の値)を実際の角度に変換"""
-    return J2_NEUTRAL + J2_DIR * offset
-
-
-def _j3_angle(offset):
-    """中立からのオフセット(正の値)を実際の角度に変換"""
-    return J3_NEUTRAL + J3_DIR * offset
+# 可動範囲 (中立 ± 値)
+J2_RANGE = 60  # 30度〜150度
+J3_RANGE = 90  # 0度〜180度 (フル範囲)
 
 
 def rest_position():
-    """休眠姿勢 (組み立て位置)"""
+    """休眠姿勢 (足がまっすぐ伸びた状態)"""
     print("休眠姿勢へ")
     j3.angle = J3_NEUTRAL
     time.sleep(0.3)
@@ -51,23 +35,33 @@ def rest_position():
 
 def sweep_j2():
     """J2 (中間関節) を可動範囲でスイープ"""
-    print(f"J2 スイープ ({J2_NEUTRAL}° → {_j2_angle(J2_RANGE)}° → {J2_NEUTRAL}°)")
-    for offset in range(0, J2_RANGE + 1, 5):
-        j2.angle = _j2_angle(offset)
+    lo = J2_NEUTRAL - J2_RANGE
+    hi = J2_NEUTRAL + J2_RANGE
+    print(f"J2 スイープ ({lo}° → {hi}° → {J2_NEUTRAL}°)")
+    for angle in range(J2_NEUTRAL, hi + 1, 5):
+        j2.angle = angle
         time.sleep(0.1)
-    for offset in range(J2_RANGE, -1, -5):
-        j2.angle = _j2_angle(offset)
+    for angle in range(hi, lo - 1, -5):
+        j2.angle = angle
+        time.sleep(0.1)
+    for angle in range(lo, J2_NEUTRAL + 1, 5):
+        j2.angle = angle
         time.sleep(0.1)
 
 
 def sweep_j3():
     """J3 (先端関節) を可動範囲でスイープ"""
-    print(f"J3 スイープ ({J3_NEUTRAL}° → {_j3_angle(J3_RANGE)}° → {J3_NEUTRAL}°)")
-    for offset in range(0, J3_RANGE + 1, 10):
-        j3.angle = _j3_angle(offset)
+    lo = J3_NEUTRAL - J3_RANGE
+    hi = J3_NEUTRAL + J3_RANGE
+    print(f"J3 スイープ ({lo}° → {hi}° → {J3_NEUTRAL}°)")
+    for angle in range(J3_NEUTRAL, hi + 1, 10):
+        j3.angle = angle
         time.sleep(0.1)
-    for offset in range(J3_RANGE, -1, -10):
-        j3.angle = _j3_angle(offset)
+    for angle in range(hi, lo - 1, -10):
+        j3.angle = angle
+        time.sleep(0.1)
+    for angle in range(lo, J3_NEUTRAL + 1, 10):
+        j3.angle = angle
         time.sleep(0.1)
 
 
@@ -76,17 +70,17 @@ def step_motion(cycles=3):
     print(f"歩行動作シミュレーション ({cycles}回)")
     for i in range(cycles):
         print(f"  ステップ {i+1}/{cycles}")
-        # 足を持ち上げる (J3を中立から大きく動かす)
-        j3.angle = _j3_angle(60)
+        # 足を持ち上げる (J3を曲げる)
+        j3.angle = J3_NEUTRAL - 30
         time.sleep(0.3)
-        # 前に出す (J2を中立から動かす)
-        j2.angle = _j2_angle(40)
+        # 前に出す (J2を前方へ)
+        j2.angle = J2_NEUTRAL - 20
         time.sleep(0.3)
-        # 足を下ろす (J3を中立寄りに戻す)
-        j3.angle = _j3_angle(20)
+        # 足を下ろす (J3を伸ばす)
+        j3.angle = J3_NEUTRAL + 20
         time.sleep(0.3)
-        # 後ろに引く (J2を中立寄りに戻す = 地面を蹴る)
-        j2.angle = _j2_angle(10)
+        # 後ろに引く (J2を後方へ = 地面を蹴る)
+        j2.angle = J2_NEUTRAL + 20
         time.sleep(0.3)
         # 中立に戻す
         j3.angle = J3_NEUTRAL
