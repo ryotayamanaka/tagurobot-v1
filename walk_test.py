@@ -13,8 +13,8 @@ i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c, address=0x40)
 pca.frequency = 50
 
-# J1: ch1, 180度サーボ (水平回転 / 脚の前後振り)
-j1 = servo.Servo(pca.channels[1], min_pulse=500, max_pulse=2500, actuation_range=180)
+# J1: ch12, 180度サーボ (水平回転 / 脚の前後振り)
+j1 = servo.Servo(pca.channels[12], min_pulse=500, max_pulse=2500, actuation_range=180)
 # J3: ch0, 270度サーボ (上下 / 足先の上げ下げ)
 j3 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range=270)
 # J2: ch6, 180度サーボ (前後 / 中間関節)

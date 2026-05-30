@@ -1,4 +1,4 @@
-"""J1サーボ (ch1, 180度) を中立角度 90度に固定してホーン取り付けを行うスクリプト。
+"""J1サーボ (ch12, 180度) を中立角度 90度に固定してホーン取り付けを行うスクリプト。
 
 ホーン取り付けが完了したら Enter で終了する。
 """
@@ -7,7 +7,7 @@ from adafruit_motor import servo
 from adafruit_pca9685 import PCA9685
 from board import SCL, SDA
 
-CHANNEL = 1
+CHANNEL = 12
 
 i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c, address=0x40)

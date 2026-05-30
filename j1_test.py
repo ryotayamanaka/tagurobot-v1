@@ -1,4 +1,4 @@
-"""J1 (ch1, 180度サーボ) を安全な可動範囲でテストするスクリプト。
+"""J1 (ch12, 180度サーボ) を安全な可動範囲でテストするスクリプト。
 
 中立 90度から ±60度 (30度 〜 150度) の範囲で動かす。
 範囲を広げる場合は、機構が物理的に動ける範囲を確認してから定数を変更すること。
@@ -9,7 +9,7 @@ from adafruit_motor import servo
 from adafruit_pca9685 import PCA9685
 from board import SCL, SDA
 
-CHANNEL = 1
+CHANNEL = 12
 
 i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c, address=0x40)
