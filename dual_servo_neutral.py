@@ -8,16 +8,16 @@ i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c, address=0x40)
 pca.frequency = 50
 
-# J3: ch0, 180度サーボ, 中立角度 90度 (物理中央)
-j3 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range=180)
-# J2: ch6, 180度サーボ, 中立角度 140度
+# J3: ch0, 270度サーボ
+j3 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range=270)
+# J2: ch6, 180度サーボ
 j2 = servo.Servo(pca.channels[6], min_pulse=500, max_pulse=2500, actuation_range=180)
 
-print("両サーボを中立角度に移動します (組み立て姿勢)")
+print("両サーボを組み立て姿勢に移動します")
 print("J2 (ch6, 180度) -> 0度")
 j2.angle = 0
-print("J3 (ch0, 180度) -> 180度")
-j3.angle = 180
+print("J3 (ch0, 270度) -> 135度 (物理中央)")
+j3.angle = 135
 
 time.sleep(3)
 

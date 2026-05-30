@@ -8,20 +8,20 @@ i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c, address=0x40)
 pca.frequency = 50
 
-# J3: ch0, 180度サーボ (本来は270度サーボ想定だが180度で代用)
-j3 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range=180)
+# J3: ch0, 270度サーボ
+j3 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range=270)
 # J2: ch6, 180度サーボ
 j2 = servo.Servo(pca.channels[6], min_pulse=500, max_pulse=2500, actuation_range=180)
 
 # 動作時の中立角度 (組み立て後、足がまっすぐ伸びた状態)
-# 組み立て時はホーンを J2=0度 / J3=180度 で取り付けるが、組み立て後の
-# 動作テストは 90度 中立 (両方向に対称に動かせる) を基準にする
-J2_NEUTRAL = 90
-J3_NEUTRAL = 90
+# 組み立て時はホーンを J2=0度 / J3=135度 で取り付けるが、組み立て後の
+# 動作テストは物理中央を基準にする
+J2_NEUTRAL = 90    # 180度サーボの物理中央
+J3_NEUTRAL = 135   # 270度サーボの物理中央
 
 # 可動範囲 (中立 ± 値)
-J2_RANGE = 60  # 30度〜150度
-J3_RANGE = 90  # 0度〜180度 (フル範囲)
+J2_RANGE = 60   # 30度〜150度
+J3_RANGE = 90   # 45度〜225度
 
 
 def rest_position():

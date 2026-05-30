@@ -13,17 +13,17 @@ i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c, address=0x40)
 pca.frequency = 50
 
-# J1: ch1, 270度サーボ (水平回転 / 脚の前後振り)
-j1 = servo.Servo(pca.channels[1], min_pulse=500, max_pulse=2500, actuation_range=270)
-# J3: ch0, 180度サーボ (上下 / 足先の上げ下げ)
-j3 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range=180)
+# J1: ch1, 180度サーボ (水平回転 / 脚の前後振り)
+j1 = servo.Servo(pca.channels[1], min_pulse=500, max_pulse=2500, actuation_range=180)
+# J3: ch0, 270度サーボ (上下 / 足先の上げ下げ)
+j3 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range=270)
 # J2: ch6, 180度サーボ (前後 / 中間関節)
 j2 = servo.Servo(pca.channels[6], min_pulse=500, max_pulse=2500, actuation_range=180)
 
 # 動作時の中立角度 (組み立て後、足がまっすぐ伸びた状態)
-J1_NEUTRAL = 135
-J2_NEUTRAL = 90
-J3_NEUTRAL = 90
+J1_NEUTRAL = 90    # 180度サーボの物理中央
+J2_NEUTRAL = 90    # 180度サーボの物理中央
+J3_NEUTRAL = 135   # 270度サーボの物理中央
 
 # 歩行サイクルの振幅 (中立からのオフセット量, 単位: 度)
 LIFT_J3 = 30   # 足を持ち上げる量

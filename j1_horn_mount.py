@@ -1,4 +1,4 @@
-"""J1サーボ (ch1, 270度) を中立角度 135度に固定してホーン取り付けを行うスクリプト。
+"""J1サーボ (ch1, 180度) を中立角度 90度に固定してホーン取り付けを行うスクリプト。
 
 ホーン取り付けが完了したら Enter で終了する。
 """
@@ -17,11 +17,11 @@ j1 = servo.Servo(
     pca.channels[CHANNEL],
     min_pulse=500,
     max_pulse=2500,
-    actuation_range=270,
+    actuation_range=180,
 )
 
-print(f"J1 (ch{CHANNEL}, 270度) を 135度 (物理中央) に移動します")
-j1.angle = 135
+print(f"J1 (ch{CHANNEL}, 180度) を 90度 (物理中央) に移動します")
+j1.angle = 90
 
 input("ホーンを取り付けたら Enter で終了")
 
