@@ -16,8 +16,8 @@ j2 = servo.Servo(pca.channels[6], min_pulse=500, max_pulse=2500, actuation_range
 print("両サーボを組み立て姿勢に移動します")
 print("J2 (ch6, 180度) -> 0度")
 j2.angle = 0
-print("J3 (ch0, 270度) -> 135度 (物理中央)")
-j3.angle = 135
+print("J3 (ch0, 270度) -> 225度")
+j3.angle = 225
 
 time.sleep(3)
 

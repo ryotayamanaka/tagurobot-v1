@@ -7,7 +7,7 @@
 サーボ構成:
   J1 (ch12, 180度) -> 90度 (物理中央)
   J2 (ch6,  180度) -> 0度  (組み立て位置)
-  J3 (ch0,  270度) -> 135度 (物理中央)
+  J3 (ch0,  270度) -> 225度 (組み立て位置)
 """
 import time
 import busio
@@ -26,8 +26,8 @@ j3 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range
 print("サーボを取り外し位置に移動します")
 
 # 先端 (J3) から順に動かすと機構の干渉が起きにくい
-print("J3 (ch0, 270度) -> 135度 (物理中央)")
-j3.angle = 135
+print("J3 (ch0, 270度) -> 225度 (組み立て位置)")
+j3.angle = 225
 time.sleep(0.5)
 
 print("J2 (ch6, 180度) -> 0度 (組み立て位置)")
