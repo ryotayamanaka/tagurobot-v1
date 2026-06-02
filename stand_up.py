@@ -24,7 +24,7 @@ STEP_DELAY = 0.2    # 各段階の待機時間 (秒)
 # どちら方向に動かすか (+ or -)
 # 機構の取り付け方向に合わせて調整する
 J2_DIR = -1
-J3_DIR = -1
+J3_DIR = +1
 
 i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c, address=0x40)
