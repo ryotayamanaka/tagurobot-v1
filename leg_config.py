@@ -6,7 +6,8 @@ group_id (0-5) で脚を識別する。1脚追加するたびに CONNECTED_LEGS 
 # 現在物理的に接続されている脚 (group_id のリスト)
 # 1脚目: 脚A (group_id=0)
 # 2脚目: 脚C (group_id=2)
-CONNECTED_LEGS = [0, 2]
+# 3脚目: 脚E (group_id=4)
+CONNECTED_LEGS = [0, 2, 4]
 
 
 def get_j3_channel(group_id):
@@ -19,13 +20,27 @@ def get_j2_channel(group_id):
     return 6 + group_id
 
 
+# J1 のチャネル割当 (暫定: PCA9685 #1 に詰め込み)
+# main.py の元設計では group_id ごとに連続だが、PCA9685 1枚に
+# 18サーボは入らないので、3脚目以降は空きチャネルを借りる。
+# フル構成では PCA9685 #2 を導入し、group_id 通りに割り当てる。
+J1_CHANNEL_MAP = {
+    0: 12,  # 脚A (元設計通り)
+    1: 13,  # 脚B (元設計通り)
+    2: 14,  # 脚C (元設計通り)
+    3: 15,  # 脚D (元設計通り)
+    4: 11,  # 脚E ← 空きを借りる (脚F J2 と将来衝突するので2枚目導入時に再配置)
+    5: 5,   # 脚F ← 空きを借りる (脚F J3 と将来衝突するので2枚目導入時に再配置)
+}
+
+
 def get_j1_channel(group_id):
     """J1 (根元, 180度サーボ) のチャネル番号
 
-    暫定: PCA9685 #1 の ch12-15 を使用
-    フル構成時: PCA9685 #2 の ch0-5 に移行する (この関数を書き換える)
+    暫定: PCA9685 #1 に詰め込み
+    フル構成時: PCA9685 #2 の ch0-5 に移行する (このマップを書き換える)
     """
-    return 12 + group_id
+    return J1_CHANNEL_MAP[group_id]
 
 
 def leg_name(group_id):
