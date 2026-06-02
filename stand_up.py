@@ -17,7 +17,7 @@ import leg_config
 # 動作パラメータ
 J2_NEUTRAL = 90
 J3_NEUTRAL = 135
-LIFT_DEGREES = 30   # 持ち上げ量 (度)
+LIFT_DEGREES = 40   # 持ち上げ量 (度)
 STEP_DEGREES = 1    # 1段階あたりの角度
 STEP_DELAY = 0.2    # 各段階の待機時間 (秒)
 
