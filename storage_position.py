@@ -3,7 +3,7 @@
 しまう時にコンパクトな姿勢にする。
 
   J1 (180度) -> 90度  (中央)
-  J2 (180度) -> 180度
+  J2 (180度) -> 170度  (上限180度に余裕を持たせた値、オフセットで超えないように)
   J3 (270度) -> 40度
 """
 import time
@@ -38,10 +38,10 @@ for group_id in leg_config.CONNECTED_LEGS:
     make_servo(leg_config.get_j1_channel(group_id), 180).angle = angle
     time.sleep(0.3)
 
-# 次に J2 を 180度に
-print("J2 (180度) -> 180度 (オフセット適用済み)")
+# 次に J2 を 170度に (180度サーボの上限180度から余裕を持たせる)
+print("J2 (180度) -> 170度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    angle = leg_config.apply_offset(180, group_id, "j2")
+    angle = leg_config.apply_offset(170, group_id, "j2")
     make_servo(leg_config.get_j2_channel(group_id), 180).angle = angle
     time.sleep(0.3)
 
