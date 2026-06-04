@@ -103,7 +103,7 @@ PCA9685 #2 (0x41):  ch0-5  = J1 × 6 (180°)
 CONNECTED_LEGS = [0, 2, 4]  # 脚A, C, E
 ```
 
-`disassembly_position.py`、`rest_position.py`、`storage_position.py`、`stand_up.py`、`stand_and_rotate.py`、`interactive_servo.py` などはこのリストを参照するので、脚を追加するときは **このリストに番号を追加** すれば全スクリプトが対応します。
+`disassembly_position.py`、`rest_position.py`、`storage_position.py`、`body_height_test.py`、`interactive_servo.py` などはこのリストを参照するので、脚を追加するときは **このリストに番号を追加** すれば全スクリプトが対応します。
 
 ---
 
@@ -141,8 +141,7 @@ CONNECTED_LEGS = [0, 2, 4]  # 脚A, C, E
 
 ```bash
 python3 rest_position.py     # 全脚を休眠姿勢に
-python3 stand_up.py          # 立ち上がり動作
-python3 stand_and_rotate.py  # 立ち上がり + 回転
+python3 body_height_test.py  # 立ち上がり + 屈伸 + 回転
 ```
 
 ---
@@ -156,9 +155,9 @@ python3 stand_and_rotate.py  # 立ち上がり + 回転
 | [rest_position.py](rest_position.py) | 全脚を休眠姿勢（足まっすぐ）に |
 | [disassembly_position.py](disassembly_position.py) | 全脚を取り外し / ホーン取付位置に |
 | [storage_position.py](storage_position.py) | 全脚を収納姿勢に折りたたみ |
-| [stand_up.py](stand_up.py) | 立ち上がり動作（J2 / J3 を協調で曲げる）|
-| [stand_and_rotate.py](stand_and_rotate.py) | 立ち上がり + J1 同期動作で胴体を回転 |
+| [body_height_test.py](body_height_test.py) | 立ち上がり + 屈伸（足先を固定したまま胴体上下）+ 左右回転 |
 | [interactive_servo.py](interactive_servo.py) | 対話的にサーボを操作（脚・関節指定）|
+| [calibrate.py](calibrate.py) | 各サーボのホーン取付誤差を測定し `calibration.json` に保存 |
 
 ### 動作時の中立角度
 
@@ -191,12 +190,15 @@ USB-C ワットメーター（YEREADW 双方向 USB-C パワーメーター）�
 
 ### 測定結果
 
-| シナリオ | スクリプト | Max-W | Max-A | Max-V | 備考 |
-|---------|----------|-------|-------|-------|------|
+| シナリオ | 内容 | Max-W | Max-A | Max-V | 備考 |
+|---------|------|-------|-------|-------|------|
 | アイドル | （何も実行しない）| 1.16W | — | — | サーボの初期保持トルクのみ |
-| 収納動作 | `storage_position.py` | **8.62W** | **1.63A** | 5.28V | J3 が 95° 大きく動く |
-| 立ち上がり | `stand_up.py` | **12.2W** | **2.32A** | 5.33V | **観測ピーク**、J2/J3 × 6 個同時動作 |
-| 回転動作 | `stand_and_rotate.py` | < 12.2W | — | — | J1 × 3 個動作、立ち上がりより小 |
+| 収納動作 | `storage_position.py`（J3 が大きく動く）| **8.62W** | **1.63A** | 5.28V | |
+| 立ち上がり | J2/J3 × 6 個同時動作 | **12.2W** | **2.32A** | 5.33V | **観測ピーク（ラズパイなし）** |
+| 回転動作 | J1 × 3 個同時動作 | < 12.2W | — | — | 立ち上がりより小 |
+| 屈伸 + 回転 | `body_height_test.py` ラズパイ載せ、STEP_DELAY=0.03 | **17〜21W** | — | — | 立ち上がり時にピーク、複数回測定でばらつきあり |
+
+> 立ち上がりと回転の測定は `stand_up.py` / `stand_and_rotate.py` という別のスクリプトで取得した過去のデータ。これらは現在 `body_height_test.py` に統合されている。
 
 ### 解釈
 
@@ -235,6 +237,8 @@ USB-C ワットメーター（YEREADW 双方向 USB-C パワーメーター）�
 - 静止維持: ~5W / 30W = **約 17%**
 
 ピーク時で 80% の使用率なので、Anker Power Bank (20000mAh / 30W) で **6脚フル構成も動かせる見込み** です。
+
+> **注意**: その後、ラズパイを胴体に載せて STEP_DELAY を縮めた状態 (`body_height_test.py`) で測定すると 17〜21W のピークが観測された。複数回の測定でばらつきが大きく、最悪 21W が出ることもある。6脚化したらこの値はさらに高くなる可能性があるため、最終的にはバッテリー側の出力余裕や DC-DC コンバーターの導入が必要かもしれない。
 
 #### 連続動作時間の予測（20,000mAh = 100Wh）
 
