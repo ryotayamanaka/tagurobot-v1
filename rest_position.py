@@ -32,19 +32,22 @@ print(f"対象の脚: {[leg_config.leg_name(g) for g in leg_config.CONNECTED_LEG
 print("休眠姿勢 (足まっすぐ) に移動します")
 
 # 先端 (J3) から順に動かして、機構の干渉を避ける
-print("J3 -> 135度")
+print("J3 -> 135度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    make_servo(leg_config.get_j3_channel(group_id), 270).angle = 135
+    angle = leg_config.apply_offset(135, group_id, "j3")
+    make_servo(leg_config.get_j3_channel(group_id), 270).angle = angle
     time.sleep(0.2)
 
-print("J2 -> 90度")
+print("J2 -> 90度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    make_servo(leg_config.get_j2_channel(group_id), 180).angle = 90
+    angle = leg_config.apply_offset(90, group_id, "j2")
+    make_servo(leg_config.get_j2_channel(group_id), 180).angle = angle
     time.sleep(0.2)
 
-print("J1 -> 90度")
+print("J1 -> 90度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    make_servo(leg_config.get_j1_channel(group_id), 180).angle = 90
+    angle = leg_config.apply_offset(90, group_id, "j1")
+    make_servo(leg_config.get_j1_channel(group_id), 180).angle = angle
     time.sleep(0.2)
 
 input("\n休眠姿勢になりました。Enterで終了")
