@@ -36,7 +36,7 @@ ROTATE_DEGREES = 25
 
 # 動作の細かさ
 STEP_DEGREES = 1
-STEP_DELAY = 0.15
+STEP_DELAY = 0.05
 HOLD_TIME = 1.5  # 各姿勢で維持する時間 (秒)
 
 i2c = busio.I2C(SCL, SDA)
