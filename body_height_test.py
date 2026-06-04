@@ -1,7 +1,8 @@
 """立った状態と屈んだ状態を行き来する屈伸動作 (スクワット) のテスト。
 
-足先位置をほぼ維持したまま、J2 と J3 を反対方向に同じ量だけ動かして
-胴体を上下させる (簡易版、厳密な逆運動学は使わない)。
+エンドエフェクターの地面に対する角度を維持しながら胴体だけ上下する。
+立ち姿勢から J2 を戻す方向、J3 をさらに曲げる方向 (両方とも +方向)
+に同じ量だけ動かすと、足先の向きを保ちつつ胴体が下がる。
 
 シーケンス:
   1. 休眠姿勢
@@ -87,9 +88,11 @@ print(f"対象の脚: {legs_str}")
 j2_stand = J2_NEUTRAL + J2_DIR * LIFT_DEGREES
 j3_stand = J3_NEUTRAL + J3_DIR * LIFT_DEGREES
 
-# かがんだ姿勢 (立ち姿勢から J2 と J3 を反対方向に SQUAT_DEGREES だけ戻す)
-j2_squat = j2_stand - J2_DIR * SQUAT_DEGREES
-j3_squat = j3_stand - J3_DIR * SQUAT_DEGREES
+# かがんだ姿勢
+# J2 は立ち姿勢から戻す方向 (+) = 中立寄りに伸ばす
+# J3 はさらに曲げる方向 (+) = エンドエフェクターの地面に対する角度を維持
+j2_squat = j2_stand + SQUAT_DEGREES
+j3_squat = j3_stand + SQUAT_DEGREES
 
 print(f"立ち姿勢:    J2={j2_stand}, J3={j3_stand}")
 print(f"かがみ姿勢:  J2={j2_squat}, J3={j3_squat}")
