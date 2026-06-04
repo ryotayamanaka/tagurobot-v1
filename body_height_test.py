@@ -1,16 +1,13 @@
-"""立った状態で足先位置をほぼ維持したまま胴体だけを上下させるテスト。
+"""立った状態と屈んだ状態を行き来する屈伸動作 (スクワット) のテスト。
 
-J2 と J3 を反対方向に同じ量だけ動かすと、近似的に足先が同じ位置に
-留まったまま胴体高さが変わる (簡易版、厳密な逆運動学は使わない)。
+足先位置をほぼ維持したまま、J2 と J3 を反対方向に同じ量だけ動かして
+胴体を上下させる (簡易版、厳密な逆運動学は使わない)。
 
 シーケンス:
   1. 休眠姿勢
   2. 立ち上がり (標準高さ)
-  3. 胴体を上げる (J2 さらに曲げる, J3 さらに伸ばす)
-  4. 標準高さに戻る
-  5. 胴体を下げる (J2 伸ばす, J3 曲げる)
-  6. 標準高さに戻る
-  7. 着地
+  3. 屈伸 (かがむ -> 立つ) を 3 回繰り返す
+  4. 着地
 """
 import time
 import busio
@@ -29,14 +26,17 @@ LIFT_DEGREES = 40
 J2_DIR = -1
 J3_DIR = +1
 
-# 胴体高さの増分 (立ち上がった状態を中心に, ±この量で上下する)
-# J2 と J3 を反対方向に同じ量動かす
-HEIGHT_DEGREES = 10
+# かがみの深さ (立った位置から下に向かう量)
+# J2 を立ち姿勢から戻す方向に、J3 を縮める方向に動かす
+SQUAT_DEGREES = 20
+
+# 繰り返し回数
+SQUAT_CYCLES = 3
 
 # 動作の細かさ
 STEP_DEGREES = 1
 STEP_DELAY = 0.08
-HOLD_TIME = 1.0
+HOLD_TIME = 0.5
 
 i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c, address=0x40)
@@ -87,44 +87,32 @@ print(f"対象の脚: {legs_str}")
 j2_stand = J2_NEUTRAL + J2_DIR * LIFT_DEGREES
 j3_stand = J3_NEUTRAL + J3_DIR * LIFT_DEGREES
 
-# 高い姿勢 (J2 をさらに曲げる, J3 をさらに伸ばす)
-j2_high = j2_stand + J2_DIR * HEIGHT_DEGREES
-j3_high = j3_stand + J3_DIR * HEIGHT_DEGREES
+# かがんだ姿勢 (立ち姿勢から J2 と J3 を反対方向に SQUAT_DEGREES だけ戻す)
+j2_squat = j2_stand - J2_DIR * SQUAT_DEGREES
+j3_squat = j3_stand - J3_DIR * SQUAT_DEGREES
 
-# 低い姿勢 (J2 を伸ばす, J3 を曲げる)
-j2_low = j2_stand - J2_DIR * HEIGHT_DEGREES
-j3_low = j3_stand - J3_DIR * HEIGHT_DEGREES
-
-print(f"標準姿勢: J2={j2_stand}, J3={j3_stand}")
-print(f"高い姿勢: J2={j2_high}, J3={j3_high}")
-print(f"低い姿勢: J2={j2_low}, J3={j3_low}")
+print(f"立ち姿勢:    J2={j2_stand}, J3={j3_stand}")
+print(f"かがみ姿勢:  J2={j2_squat}, J3={j3_squat}")
 
 try:
-    print("\n[1/7] 休眠姿勢にリセット")
+    print("\n[1] 休眠姿勢にリセット")
     set_all(J2_NEUTRAL, J3_NEUTRAL)
     time.sleep(1)
 
-    print("[2/7] 立ち上がり")
+    print("[2] 立ち上がり")
     smooth_move(J2_NEUTRAL, j2_stand, J3_NEUTRAL, j3_stand)
     time.sleep(HOLD_TIME)
 
-    print("[3/7] 胴体を上げる")
-    smooth_move(j2_stand, j2_high, j3_stand, j3_high)
-    time.sleep(HOLD_TIME)
+    for i in range(SQUAT_CYCLES):
+        print(f"[3-{i+1}/{SQUAT_CYCLES}] かがむ")
+        smooth_move(j2_stand, j2_squat, j3_stand, j3_squat)
+        time.sleep(HOLD_TIME)
 
-    print("[4/7] 標準高さに戻る")
-    smooth_move(j2_high, j2_stand, j3_high, j3_stand)
-    time.sleep(HOLD_TIME)
+        print(f"[3-{i+1}/{SQUAT_CYCLES}] 立つ")
+        smooth_move(j2_squat, j2_stand, j3_squat, j3_stand)
+        time.sleep(HOLD_TIME)
 
-    print("[5/7] 胴体を下げる")
-    smooth_move(j2_stand, j2_low, j3_stand, j3_low)
-    time.sleep(HOLD_TIME)
-
-    print("[6/7] 標準高さに戻る")
-    smooth_move(j2_low, j2_stand, j3_low, j3_stand)
-    time.sleep(HOLD_TIME)
-
-    print("[7/7] 着地")
+    print("[4] 着地")
     smooth_move(j2_stand, J2_NEUTRAL, j3_stand, J3_NEUTRAL)
 
 except KeyboardInterrupt:
