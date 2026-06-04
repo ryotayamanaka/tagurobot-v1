@@ -119,10 +119,12 @@ try:
             print(f"範囲外: {joint_name} は 0-{rng}度のみ")
             continue
 
+        group_id = LEG_NAMES[leg_name_lower]
+        actual_angle = leg_config.apply_offset(angle, group_id, joint_name)
         try:
-            get_servo(leg_name_lower, joint_name).angle = angle
+            get_servo(leg_name_lower, joint_name).angle = actual_angle
             current[(leg_name_lower, joint_name)] = angle
-            print(f"脚{leg_name_lower.upper()} {joint_name} -> {angle}度")
+            print(f"脚{leg_name_lower.upper()} {joint_name} -> {angle}度 (実際: {actual_angle}度)")
         except Exception as e:
             print(f"エラー: {e}")
 

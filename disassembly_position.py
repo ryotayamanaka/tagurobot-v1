@@ -32,25 +32,28 @@ def make_servo(channel, actuation_range):
 print(f"対象の脚: {[leg_config.leg_name(g) for g in leg_config.CONNECTED_LEGS]}")
 
 # 先端 (J3) から順に動かすと機構の干渉が起きにくい
-print("J3 (270度) -> 225度")
+print("J3 (270度) -> 225度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
     ch = leg_config.get_j3_channel(group_id)
-    print(f"  脚{leg_config.leg_name(group_id)} (ch{ch})")
-    make_servo(ch, 270).angle = 225
+    angle = leg_config.apply_offset(225, group_id, "j3")
+    print(f"  脚{leg_config.leg_name(group_id)} (ch{ch}) -> {angle}度")
+    make_servo(ch, 270).angle = angle
     time.sleep(0.3)
 
-print("J2 (180度) -> 0度")
+print("J2 (180度) -> 0度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
     ch = leg_config.get_j2_channel(group_id)
-    print(f"  脚{leg_config.leg_name(group_id)} (ch{ch})")
-    make_servo(ch, 180).angle = 0
+    angle = leg_config.apply_offset(0, group_id, "j2")
+    print(f"  脚{leg_config.leg_name(group_id)} (ch{ch}) -> {angle}度")
+    make_servo(ch, 180).angle = angle
     time.sleep(0.3)
 
-print("J1 (180度) -> 90度")
+print("J1 (180度) -> 90度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
     ch = leg_config.get_j1_channel(group_id)
-    print(f"  脚{leg_config.leg_name(group_id)} (ch{ch})")
-    make_servo(ch, 180).angle = 90
+    angle = leg_config.apply_offset(90, group_id, "j1")
+    print(f"  脚{leg_config.leg_name(group_id)} (ch{ch}) -> {angle}度")
+    make_servo(ch, 180).angle = angle
     time.sleep(0.3)
 
 input("\n取り外し可能な姿勢になりました。Enterで終了 (サーボの保持トルクが切れる)")

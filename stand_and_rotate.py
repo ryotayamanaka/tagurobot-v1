@@ -65,13 +65,13 @@ for group_id in leg_config.CONNECTED_LEGS:
 
 def set_all_j1(angle):
     for group_id in leg_config.CONNECTED_LEGS:
-        legs_j1[group_id].angle = angle
+        legs_j1[group_id].angle = leg_config.apply_offset(angle, group_id, "j1")
 
 
 def set_all_j2_j3(j2_angle, j3_angle):
     for group_id in leg_config.CONNECTED_LEGS:
-        legs_j2[group_id].angle = j2_angle
-        legs_j3[group_id].angle = j3_angle
+        legs_j2[group_id].angle = leg_config.apply_offset(j2_angle, group_id, "j2")
+        legs_j3[group_id].angle = leg_config.apply_offset(j3_angle, group_id, "j3")
 
 
 def smooth_j1(start, end):

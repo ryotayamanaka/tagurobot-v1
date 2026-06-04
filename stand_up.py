@@ -49,10 +49,10 @@ for group_id in leg_config.CONNECTED_LEGS:
 
 
 def set_all(j2_angle, j3_angle):
-    """全脚の J2 と J3 を同時に同じ角度に設定"""
+    """全脚の J2 と J3 を同時に同じ角度に設定 (オフセット適用済み)"""
     for group_id in leg_config.CONNECTED_LEGS:
-        legs_j2[group_id].angle = j2_angle
-        legs_j3[group_id].angle = j3_angle
+        legs_j2[group_id].angle = leg_config.apply_offset(j2_angle, group_id, "j2")
+        legs_j3[group_id].angle = leg_config.apply_offset(j3_angle, group_id, "j3")
 
 
 legs_str = [leg_config.leg_name(g) for g in leg_config.CONNECTED_LEGS]

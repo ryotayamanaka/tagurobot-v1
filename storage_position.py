@@ -32,21 +32,24 @@ print(f"対象の脚: {[leg_config.leg_name(g) for g in leg_config.CONNECTED_LEG
 print("収納姿勢に折りたたみます")
 
 # まず J1 を中央に戻して脚の向きを揃える
-print("J1 (180度) -> 90度 (中央)")
+print("J1 (180度) -> 90度 (中央, オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    make_servo(leg_config.get_j1_channel(group_id), 180).angle = 90
+    angle = leg_config.apply_offset(90, group_id, "j1")
+    make_servo(leg_config.get_j1_channel(group_id), 180).angle = angle
     time.sleep(0.3)
 
 # 次に J2 を 180度に
-print("J2 (180度) -> 180度")
+print("J2 (180度) -> 180度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    make_servo(leg_config.get_j2_channel(group_id), 180).angle = 180
+    angle = leg_config.apply_offset(180, group_id, "j2")
+    make_servo(leg_config.get_j2_channel(group_id), 180).angle = angle
     time.sleep(0.3)
 
 # 最後に J3 を 40度に (大きく回転するので最後)
-print("J3 (270度) -> 40度")
+print("J3 (270度) -> 40度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    make_servo(leg_config.get_j3_channel(group_id), 270).angle = 40
+    angle = leg_config.apply_offset(40, group_id, "j3")
+    make_servo(leg_config.get_j3_channel(group_id), 270).angle = angle
     time.sleep(0.3)
 
 input("\n収納姿勢になりました。Enterで終了 (サーボの保持トルクが切れる)")
