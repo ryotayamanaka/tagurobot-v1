@@ -29,10 +29,10 @@ J3_DIR = +1
 
 # かがみの深さ (立った位置から下に向かう量)
 # J2 を立ち姿勢から戻す方向に、J3 を縮める方向に動かす
-SQUAT_DEGREES = 30
+SQUAT_DEGREES = 40
 
 # 繰り返し回数
-SQUAT_CYCLES = 3
+SQUAT_CYCLES = 2
 
 # 動作の細かさ
 STEP_DEGREES = 1
