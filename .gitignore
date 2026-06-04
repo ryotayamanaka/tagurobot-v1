@@ -1,0 +1,6 @@
+# 機体個別のキャリブレーション値 (各機体で実測した取り付け誤差の補正値)
+calibration.json
+
+# Python
+__pycache__/
+*.pyc
