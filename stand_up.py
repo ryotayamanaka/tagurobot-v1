@@ -19,7 +19,7 @@ J2_NEUTRAL = 90
 J3_NEUTRAL = 135
 LIFT_DEGREES = 40   # 持ち上げ量 (度)
 STEP_DEGREES = 1    # 1段階あたりの角度
-STEP_DELAY = 0.2    # 各段階の待機時間 (秒)
+STEP_DELAY = 0.05   # 各段階の待機時間 (秒)
 
 # どちら方向に動かすか (+ or -)
 # 機構の取り付け方向に合わせて調整する
