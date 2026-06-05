@@ -3,20 +3,13 @@
 休眠姿勢 (足まっすぐ) からいきなり胴体を持ち上げる従来方式は、
 サーボのトルクが効きにくい角度から始まるため大電力を消費する。
 
-このスクリプトでは 2 段階に分ける。J3 だけを使って準備姿勢を作ることで
-J2 の反転がなくなり、滑らかな 1 方向の動きになる:
-  STEP A: J3 を + 方向に動かして足先を地面に近づける (J2 は維持)
-  STEP B: そこから立ち姿勢に持っていく (J2 が初めて動き、J3 は引き続き同じ方向)
+このスクリプトでは立ち上がりを 3 つの動作に分け、同時に動くサーボの
+数を 3 個までに抑えることで電力ピークを下げる:
+  STEP A:  J3 を + 方向に動かして足先を地面に近づける (J2 は維持)
+  STEP B1: J3 をさらに + 方向に動かして足先を強く接地させる
+  STEP B2: J2 を - 方向に動かして胴体を持ち上げる
 
-着地は逆順に同じ 2 段階を踏むことで、消費電力を抑える。
-
-シーケンス:
-  1. 休眠姿勢
-  2. STEP A: J3 を曲げて足先を地面に向ける (準備姿勢)
-  3. STEP B: 立ち上がり (準備姿勢 -> 立ち姿勢)
-  4. 数秒維持
-  5. STEP B 逆: 立ち姿勢 -> 準備姿勢
-  6. STEP A 逆: 準備姿勢 -> 休眠姿勢
+着地は逆順 (B2 -> B1 -> A) で同じ理屈で消費電力を抑える。
 """
 import time
 import busio
@@ -43,6 +36,7 @@ PREP_J3_DEGREES = 30
 STEP_DEGREES = 1
 STEP_DELAY = 0.05
 HOLD_TIME = 1.0
+BETWEEN_PHASE_DELAY = 0.3  # 段階間の短い待機
 
 i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c, address=0x40)
@@ -106,22 +100,30 @@ try:
     set_all(J2_NEUTRAL, J3_NEUTRAL)
     time.sleep(1)
 
-    print("[2] STEP A: 関節を曲げる (準備姿勢)")
+    print("[2] STEP A: J3 を曲げて準備姿勢へ (J2 は維持)")
     smooth_move(J2_NEUTRAL, j2_prep, J3_NEUTRAL, j3_prep)
+    time.sleep(BETWEEN_PHASE_DELAY)
+
+    print("[3] STEP B1: J3 をさらに伸ばす (J2 は維持)")
+    smooth_move(j2_prep, j2_prep, j3_prep, j3_stand)
+    time.sleep(BETWEEN_PHASE_DELAY)
+
+    print("[4] STEP B2: J2 を曲げて胴体を持ち上げる")
+    smooth_move(j2_prep, j2_stand, j3_stand, j3_stand)
     time.sleep(HOLD_TIME)
 
-    print("[3] STEP B: 立ち上がり")
-    smooth_move(j2_prep, j2_stand, j3_prep, j3_stand)
-    time.sleep(HOLD_TIME)
-
-    print("[4] 立ち姿勢で維持")
+    print("[5] 立ち姿勢で維持")
     time.sleep(2)
 
-    print("[5] STEP B 逆: 立ち姿勢 -> 準備姿勢")
-    smooth_move(j2_stand, j2_prep, j3_stand, j3_prep)
-    time.sleep(HOLD_TIME)
+    print("[6] STEP B2 逆: J2 を戻す")
+    smooth_move(j2_stand, j2_prep, j3_stand, j3_stand)
+    time.sleep(BETWEEN_PHASE_DELAY)
 
-    print("[6] STEP A 逆: 準備姿勢 -> 休眠姿勢")
+    print("[7] STEP B1 逆: J3 を戻す")
+    smooth_move(j2_prep, j2_prep, j3_stand, j3_prep)
+    time.sleep(BETWEEN_PHASE_DELAY)
+
+    print("[8] STEP A 逆: J3 を完全に戻して休眠姿勢へ")
     smooth_move(j2_prep, J2_NEUTRAL, j3_prep, J3_NEUTRAL)
 
 except KeyboardInterrupt:
