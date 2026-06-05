@@ -32,11 +32,28 @@ J3_DIR = +1
 # J2 は維持し、J3 を + 方向に動かす
 PREP_J3_DEGREES = 30
 
+# 電源モード
+# "battery": モバイルバッテリー (5V/3A = 15W) 制約あり。動作は控えめに。
+# "adapter": 5V ACアダプタや DC-DC 経由 (~25-30W) で余裕あり。速めに。
+POWER_MODE = "battery"
+
+# モードごとの動作パラメータ
+_POWER_PARAMS = {
+    "battery": {
+        "STEP_DELAY": 0.08,
+        "BETWEEN_PHASE_DELAY": 0.3,
+    },
+    "adapter": {
+        "STEP_DELAY": 0.05,
+        "BETWEEN_PHASE_DELAY": 0.2,
+    },
+}
+
 # 動作の細かさ
 STEP_DEGREES = 1
-STEP_DELAY = 0.05
+STEP_DELAY = _POWER_PARAMS[POWER_MODE]["STEP_DELAY"]
+BETWEEN_PHASE_DELAY = _POWER_PARAMS[POWER_MODE]["BETWEEN_PHASE_DELAY"]
 HOLD_TIME = 1.0
-BETWEEN_PHASE_DELAY = 0.3  # 段階間の短い待機
 
 i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c, address=0x40)
@@ -82,6 +99,7 @@ def smooth_move(j2_start, j2_end, j3_start, j3_end):
 
 legs_str = [leg_config.leg_name(g) for g in leg_config.CONNECTED_LEGS]
 print(f"対象の脚: {legs_str}")
+print(f"電源モード: {POWER_MODE} (STEP_DELAY={STEP_DELAY}, BETWEEN_PHASE_DELAY={BETWEEN_PHASE_DELAY})")
 
 # 立ち姿勢
 j2_stand = J2_NEUTRAL + J2_DIR * LIFT_DEGREES
