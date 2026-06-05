@@ -1,19 +1,22 @@
-"""省電力な立ち上がりテスト。
+"""省電力な立ち上がり / 着地テスト。
 
 休眠姿勢 (足まっすぐ) からいきなり胴体を持ち上げる従来方式は、
 サーボのトルクが効きにくい角度から始まるため大電力を消費する。
 
-このスクリプトでは 2 段階に分ける:
-  STEP A: J2 と J3 を + 方向に動かして関節を曲げる
-          (足先が地面に向かって伸び、サーボに有利な角度を作る)
-  STEP B: そこから立ち姿勢に持っていく
+このスクリプトでは 2 段階に分ける。J3 だけを使って準備姿勢を作ることで
+J2 の反転がなくなり、滑らかな 1 方向の動きになる:
+  STEP A: J3 を + 方向に動かして足先を地面に近づける (J2 は維持)
+  STEP B: そこから立ち姿勢に持っていく (J2 が初めて動き、J3 は引き続き同じ方向)
+
+着地は逆順に同じ 2 段階を踏むことで、消費電力を抑える。
 
 シーケンス:
   1. 休眠姿勢
-  2. STEP A: 関節を曲げる (準備姿勢)
+  2. STEP A: J3 を曲げて足先を地面に向ける (準備姿勢)
   3. STEP B: 立ち上がり (準備姿勢 -> 立ち姿勢)
   4. 数秒維持
-  5. 着地 (立ち姿勢 -> 休眠姿勢)
+  5. STEP B 逆: 立ち姿勢 -> 準備姿勢
+  6. STEP A 逆: 準備姿勢 -> 休眠姿勢
 """
 import time
 import busio
@@ -32,9 +35,9 @@ LIFT_DEGREES = 40
 J2_DIR = -1
 J3_DIR = +1
 
-# STEP A: 準備姿勢の量 (J2 と J3 を + 方向に動かして関節を曲げる)
-# 大きくすると足先がより地面に向かう
-PREP_DEGREES = 20
+# STEP A: 準備姿勢 (J3 だけを動かして足先を地面に近づける)
+# J2 は維持し、J3 を + 方向に動かす
+PREP_J3_DEGREES = 30
 
 # 動作の細かさ
 STEP_DEGREES = 1
@@ -90,9 +93,9 @@ print(f"対象の脚: {legs_str}")
 j2_stand = J2_NEUTRAL + J2_DIR * LIFT_DEGREES
 j3_stand = J3_NEUTRAL + J3_DIR * LIFT_DEGREES
 
-# 準備姿勢 (休眠姿勢から J2/J3 を + 方向に同量曲げる)
-j2_prep = J2_NEUTRAL + PREP_DEGREES
-j3_prep = J3_NEUTRAL + PREP_DEGREES
+# 準備姿勢 (J2 は中立のまま、J3 だけ + 方向)
+j2_prep = J2_NEUTRAL
+j3_prep = J3_NEUTRAL + PREP_J3_DEGREES
 
 print(f"休眠姿勢:    J2={J2_NEUTRAL}, J3={J3_NEUTRAL}")
 print(f"準備姿勢:    J2={j2_prep}, J3={j3_prep}")
@@ -114,8 +117,12 @@ try:
     print("[4] 立ち姿勢で維持")
     time.sleep(2)
 
-    print("[5] 着地")
-    smooth_move(j2_stand, J2_NEUTRAL, j3_stand, J3_NEUTRAL)
+    print("[5] STEP B 逆: 立ち姿勢 -> 準備姿勢")
+    smooth_move(j2_stand, j2_prep, j3_stand, j3_prep)
+    time.sleep(HOLD_TIME)
+
+    print("[6] STEP A 逆: 準備姿勢 -> 休眠姿勢")
+    smooth_move(j2_prep, J2_NEUTRAL, j3_prep, J3_NEUTRAL)
 
 except KeyboardInterrupt:
     print("\n中断 - 休眠姿勢に戻します")
