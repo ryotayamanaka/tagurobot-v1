@@ -55,11 +55,6 @@ STEP_DELAY = _POWER_PARAMS[POWER_MODE]["STEP_DELAY"]
 BETWEEN_PHASE_DELAY = _POWER_PARAMS[POWER_MODE]["BETWEEN_PHASE_DELAY"]
 HOLD_TIME = 1.0
 
-# Ease-in (動き始めをゆっくりにして初期加速のピーク電流を抑える)
-# STEP B2 (J2 で胴体を持ち上げる) に適用
-EASE_IN_STEPS = 10   # 最初の N ステップに適用
-EASE_IN_FACTOR = 3.0 # 開始時の遅延倍率
-
 i2c = busio.I2C(SCL, SDA)
 pca = PCA9685(i2c, address=0x40)
 pca.frequency = 50
@@ -88,16 +83,8 @@ def set_all(j2_angle, j3_angle):
         legs_j3[group_id].angle = leg_config.apply_offset(j3_angle, group_id, "j3")
 
 
-def smooth_move(j2_start, j2_end, j3_start, j3_end,
-                ease_in_steps=0, ease_in_factor=1.0):
-    """J2 と J3 を同時に滑らかに動かす。
-
-    ease_in_steps: 最初の N ステップだけ遅延を伸ばしてゆっくり加速する。
-                   電力ピーク (動き始めの初期加速電流) を抑えるのに使う。
-    ease_in_factor: 最初のステップで通常の何倍の遅延にするか。
-                    例: 3.0 なら最初は STEP_DELAY × 3 で始まり、
-                    ease_in_steps の終わりで STEP_DELAY × 1 に戻る。
-    """
+def smooth_move(j2_start, j2_end, j3_start, j3_end):
+    """J2 と J3 を同時に滑らかに動かす"""
     j2_step = STEP_DEGREES if j2_end >= j2_start else -STEP_DEGREES
     j3_step = STEP_DEGREES if j3_end >= j3_start else -STEP_DEGREES
     j2_steps = abs(j2_end - j2_start)
@@ -107,18 +94,12 @@ def smooth_move(j2_start, j2_end, j3_start, j3_end,
         j2 = j2_start + j2_step * min(i, j2_steps)
         j3 = j3_start + j3_step * min(i, j3_steps)
         set_all(j2, j3)
-        if i < ease_in_steps:
-            # 線形補間: i=0 で factor 倍、i=ease_in_steps で 1 倍
-            factor = ease_in_factor - (ease_in_factor - 1) * i / ease_in_steps
-            time.sleep(STEP_DELAY * factor)
-        else:
-            time.sleep(STEP_DELAY)
+        time.sleep(STEP_DELAY)
 
 
 legs_str = [leg_config.leg_name(g) for g in leg_config.CONNECTED_LEGS]
 print(f"対象の脚: {legs_str}")
 print(f"電源モード: {POWER_MODE} (STEP_DELAY={STEP_DELAY}, BETWEEN_PHASE_DELAY={BETWEEN_PHASE_DELAY})")
-print(f"Ease-in: 最初の {EASE_IN_STEPS} ステップを {EASE_IN_FACTOR}倍ゆっくり (STEP B2 のみ)")
 
 # 立ち姿勢
 j2_stand = J2_NEUTRAL + J2_DIR * LIFT_DEGREES
@@ -128,8 +109,12 @@ j3_stand = J3_NEUTRAL + J3_DIR * LIFT_DEGREES
 j2_prep = J2_NEUTRAL
 j3_prep = J3_NEUTRAL + PREP_J3_DEGREES
 
+# STEP B2 の中間点 (J2 の動作幅を半分に分割して初期加速ピークを下げる)
+j2_mid = (j2_prep + j2_stand) // 2
+
 print(f"休眠姿勢:    J2={J2_NEUTRAL}, J3={J3_NEUTRAL}")
 print(f"準備姿勢:    J2={j2_prep}, J3={j3_prep}")
+print(f"B2 中間点:   J2={j2_mid}")
 print(f"立ち姿勢:    J2={j2_stand}, J3={j3_stand}")
 
 try:
@@ -145,17 +130,23 @@ try:
     smooth_move(j2_prep, j2_prep, j3_prep, j3_stand)
     time.sleep(BETWEEN_PHASE_DELAY)
 
-    print("[4] STEP B2: J2 を曲げて胴体を持ち上げる (ease-in 適用)")
-    smooth_move(j2_prep, j2_stand, j3_stand, j3_stand,
-                ease_in_steps=EASE_IN_STEPS, ease_in_factor=EASE_IN_FACTOR)
+    print("[4a] STEP B2a: J2 を中間点まで動かす")
+    smooth_move(j2_prep, j2_mid, j3_stand, j3_stand)
+    time.sleep(BETWEEN_PHASE_DELAY)
+
+    print("[4b] STEP B2b: J2 を立ち姿勢まで動かす")
+    smooth_move(j2_mid, j2_stand, j3_stand, j3_stand)
     time.sleep(HOLD_TIME)
 
     print("[5] 立ち姿勢で維持")
     time.sleep(2)
 
-    print("[6] STEP B2 逆: J2 を戻す (ease-in 適用)")
-    smooth_move(j2_stand, j2_prep, j3_stand, j3_stand,
-                ease_in_steps=EASE_IN_STEPS, ease_in_factor=EASE_IN_FACTOR)
+    print("[6a] STEP B2b 逆: J2 を中間点まで戻す")
+    smooth_move(j2_stand, j2_mid, j3_stand, j3_stand)
+    time.sleep(BETWEEN_PHASE_DELAY)
+
+    print("[6b] STEP B2a 逆: J2 を準備姿勢まで戻す")
+    smooth_move(j2_mid, j2_prep, j3_stand, j3_stand)
     time.sleep(BETWEEN_PHASE_DELAY)
 
     print("[7] STEP B1 逆: J3 を戻す")
