@@ -22,11 +22,6 @@ key は group_id (文字列)、値はオフセット (度、整数)。
 import json
 import os
 
-import busio
-from adafruit_motor import servo
-from adafruit_pca9685 import PCA9685
-from board import SCL, SDA
-
 import leg_config
 
 CALIBRATION_FILE = "calibration.json"
@@ -38,12 +33,8 @@ NEUTRAL = {
     "j3": 135,
 }
 
-# 関節定義: (チャネル取得関数, 可動範囲)
-JOINT_TYPES = {
-    "j1": (leg_config.get_j1_channel, 180),
-    "j2": (leg_config.get_j2_channel, 180),
-    "j3": (leg_config.get_j3_channel, 270),
-}
+# 関節の一覧 (可動範囲・チャネル・ボードの解決は leg_config に集約)
+JOINT_TYPES = leg_config.JOINT_RANGE
 
 
 def load_calibration():
@@ -59,10 +50,6 @@ def save_calibration(data):
 
 
 def main():
-    i2c = busio.I2C(SCL, SDA)
-    pca = PCA9685(i2c, address=0x40)
-    pca.frequency = 50
-
     try:
         # 脚を選択
         leg_options = {leg_config.leg_name(g).lower(): g for g in leg_config.CONNECTED_LEGS}
@@ -81,29 +68,25 @@ def main():
             print(f"不明な関節: {joint}")
             return
 
-        get_ch, rng = JOINT_TYPES[joint]
-        channel = get_ch(group_id)
+        rng = JOINT_TYPES[joint]
         neutral = NEUTRAL[joint]
 
         # 既存のオフセットを読み込む
         cal = load_calibration()
         offset = cal.get(str(group_id), {}).get(joint, 0)
 
-        # サーボを準備
-        target = servo.Servo(
-            pca.channels[channel],
-            min_pulse=500,
-            max_pulse=2500,
-            actuation_range=rng,
-        )
+        # サーボを準備 (ボード・チャネルの解決は leg_config が行う)
+        target = leg_config.get_servo(group_id, joint)
 
         def apply():
+            # キャリブレーションは生の (基準 + オフセット) を直接指示する。
+            # apply_offset は使わない (二重適用になるため)。
             angle = neutral + offset
             if angle < 0 or angle > rng:
                 print(f"  警告: 指示角度 {angle} が可動範囲 (0-{rng}) を超えています")
                 return
             target.angle = angle
-            print(f"  脚{leg} {joint} ch{channel}: 基準 {neutral} + オフセット {offset:+d} = {angle}度")
+            print(f"  脚{leg} {joint}: 基準 {neutral} + オフセット {offset:+d} = {angle}度")
 
         print(f"\n脚{leg} {joint} を基準位置 {neutral} 度に動かします")
         apply()
@@ -138,7 +121,7 @@ def main():
                 print("不明なコマンド (u/d/r/s/q)")
 
     finally:
-        pca.deinit()
+        leg_config.deinit()
 
 
 if __name__ == "__main__":

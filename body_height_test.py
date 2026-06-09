@@ -16,10 +16,6 @@
   4. 着地
 """
 import time
-import busio
-from adafruit_motor import servo
-from adafruit_pca9685 import PCA9685
-from board import SCL, SDA
 
 import leg_config
 
@@ -45,35 +41,12 @@ STEP_DEGREES = 1
 STEP_DELAY = 0.03
 HOLD_TIME = 0.5
 
-i2c = busio.I2C(SCL, SDA)
-pca = PCA9685(i2c, address=0x40)
-pca.frequency = 50
-
-
-def make_servo(channel, actuation_range):
-    return servo.Servo(
-        pca.channels[channel],
-        min_pulse=500,
-        max_pulse=2500,
-        actuation_range=actuation_range,
-    )
-
-
-legs_j1 = {}
-legs_j2 = {}
-legs_j3 = {}
-for group_id in leg_config.CONNECTED_LEGS:
-    legs_j1[group_id] = make_servo(leg_config.get_j1_channel(group_id), 180)
-    legs_j2[group_id] = make_servo(leg_config.get_j2_channel(group_id), 180)
-    legs_j3[group_id] = make_servo(leg_config.get_j3_channel(group_id), 270)
-
-
 def set_all(j1_angle, j2_angle, j3_angle):
     """全脚の 3 サーボを同時に同じ角度に設定 (オフセット適用済み)"""
     for group_id in leg_config.CONNECTED_LEGS:
-        legs_j1[group_id].angle = leg_config.apply_offset(j1_angle, group_id, "j1")
-        legs_j2[group_id].angle = leg_config.apply_offset(j2_angle, group_id, "j2")
-        legs_j3[group_id].angle = leg_config.apply_offset(j3_angle, group_id, "j3")
+        leg_config.set_angle(group_id, "j1", j1_angle)
+        leg_config.set_angle(group_id, "j2", j2_angle)
+        leg_config.set_angle(group_id, "j3", j3_angle)
 
 
 def smooth_move(j1_start, j1_end, j2_start, j2_end, j3_start, j3_end):
@@ -165,5 +138,5 @@ except KeyboardInterrupt:
     print("\n中断 - 休眠姿勢に戻します")
     set_all(J1_NEUTRAL, J2_NEUTRAL, J3_NEUTRAL)
 
-pca.deinit()
+leg_config.deinit()
 print("完了")

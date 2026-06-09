@@ -10,44 +10,16 @@
   > status       # 現在の指示角度を表示
   > q            # 終了
 """
-import busio
-from adafruit_motor import servo
-from adafruit_pca9685 import PCA9685
-from board import SCL, SDA
-
 import leg_config
 
-i2c = busio.I2C(SCL, SDA)
-pca = PCA9685(i2c, address=0x40)
-pca.frequency = 50
-
-# 関節定義: (チャネル取得関数, 可動範囲)
-JOINT_TYPES = {
-    "j1": (leg_config.get_j1_channel, 180),
-    "j2": (leg_config.get_j2_channel, 180),
-    "j3": (leg_config.get_j3_channel, 270),
-}
+# 関節の可動範囲 (leg_config に集約)
+JOINT_TYPES = leg_config.JOINT_RANGE
 
 # 脚名 (a/b/c/...) と group_id の対応
 LEG_NAMES = {leg_config.leg_name(g).lower(): g for g in leg_config.CONNECTED_LEGS}
 
-# サーボオブジェクトとキャッシュ用ディクショナリ
-servos = {}  # key: (leg_name, joint_name)
+# 指示済み論理角度のキャッシュ (status 表示用)
 current = {}  # key: (leg_name, joint_name)
-
-
-def get_servo(leg_name_lower, joint_name):
-    key = (leg_name_lower, joint_name)
-    if key not in servos:
-        group_id = LEG_NAMES[leg_name_lower]
-        get_ch, rng = JOINT_TYPES[joint_name]
-        servos[key] = servo.Servo(
-            pca.channels[get_ch(group_id)],
-            min_pulse=500,
-            max_pulse=2500,
-            actuation_range=rng,
-        )
-    return servos[key]
 
 
 def print_help():
@@ -114,15 +86,14 @@ try:
             print(f"角度は数値で指定: {angle_str}")
             continue
 
-        _get_ch, rng = JOINT_TYPES[joint_name]
+        rng = JOINT_TYPES[joint_name]
         if angle < 0 or angle > rng:
             print(f"範囲外: {joint_name} は 0-{rng}度のみ")
             continue
 
         group_id = LEG_NAMES[leg_name_lower]
-        actual_angle = leg_config.apply_offset(angle, group_id, joint_name)
         try:
-            get_servo(leg_name_lower, joint_name).angle = actual_angle
+            actual_angle = leg_config.set_angle(group_id, joint_name, angle)
             current[(leg_name_lower, joint_name)] = angle
             print(f"脚{leg_name_lower.upper()} {joint_name} -> {angle}度 (実際: {actual_angle}度)")
         except Exception as e:
@@ -131,5 +102,5 @@ try:
 except KeyboardInterrupt:
     print("\n中断しました")
 
-pca.deinit()
+leg_config.deinit()
 print("完了")

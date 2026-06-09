@@ -12,10 +12,6 @@
 着地は逆順 (B2 -> B1 -> A) で同じ理屈で消費電力を抑える。
 """
 import time
-import busio
-from adafruit_motor import servo
-from adafruit_pca9685 import PCA9685
-from board import SCL, SDA
 
 import leg_config
 
@@ -55,32 +51,11 @@ STEP_DELAY = _POWER_PARAMS[POWER_MODE]["STEP_DELAY"]
 BETWEEN_PHASE_DELAY = _POWER_PARAMS[POWER_MODE]["BETWEEN_PHASE_DELAY"]
 HOLD_TIME = 1.0
 
-i2c = busio.I2C(SCL, SDA)
-pca = PCA9685(i2c, address=0x40)
-pca.frequency = 50
-
-
-def make_servo(channel, actuation_range):
-    return servo.Servo(
-        pca.channels[channel],
-        min_pulse=500,
-        max_pulse=2500,
-        actuation_range=actuation_range,
-    )
-
-
-legs_j2 = {}
-legs_j3 = {}
-for group_id in leg_config.CONNECTED_LEGS:
-    legs_j2[group_id] = make_servo(leg_config.get_j2_channel(group_id), 180)
-    legs_j3[group_id] = make_servo(leg_config.get_j3_channel(group_id), 270)
-
-
 def set_all(j2_angle, j3_angle):
     """全脚の J2 と J3 を同時に同じ角度に設定 (オフセット適用済み)"""
     for group_id in leg_config.CONNECTED_LEGS:
-        legs_j2[group_id].angle = leg_config.apply_offset(j2_angle, group_id, "j2")
-        legs_j3[group_id].angle = leg_config.apply_offset(j3_angle, group_id, "j3")
+        leg_config.set_angle(group_id, "j2", j2_angle)
+        leg_config.set_angle(group_id, "j3", j3_angle)
 
 
 def smooth_move(j2_start, j2_end, j3_start, j3_end):
@@ -160,5 +135,5 @@ except KeyboardInterrupt:
     print("\n中断 - 休眠姿勢に戻します")
     set_all(J2_NEUTRAL, J3_NEUTRAL)
 
-pca.deinit()
+leg_config.deinit()
 print("完了")
