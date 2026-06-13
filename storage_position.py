@@ -3,8 +3,8 @@
 しまう時にコンパクトな姿勢にする。
 
   J1 (180度) -> 90度  (中央)
-  J2 (270度) -> 235度 (折りたたみ: 中立135+100。270°化で旧165°相当より25°深く曲げる)
-  J3 (270度) -> 30度
+  J2 (270度) -> 220度 (折りたたみ: 中立135+85。実機で一番きれいに収まった値)
+  J3 (270度) -> 40度  (実機で一番きれいに収まった値)
 """
 import time
 
@@ -19,16 +19,16 @@ for group_id in leg_config.CONNECTED_LEGS:
     leg_config.set_angle(group_id, "j1", 90)
     time.sleep(0.3)
 
-# 次に J2 を 235度に (中立135 + 100。270度サーボなので上限270に余裕あり)
-print("J2 (270度) -> 235度 (オフセット適用済み)")
+# 次に J2 を 220度に (中立135 + 85。実機で一番きれいに収まった値)
+print("J2 (270度) -> 220度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    leg_config.set_angle(group_id, "j2", 235)
+    leg_config.set_angle(group_id, "j2", 220)
     time.sleep(0.3)
 
-# 最後に J3 を 30度に (大きく回転するので最後)
-print("J3 (270度) -> 30度 (オフセット適用済み)")
+# 最後に J3 を 40度に (大きく回転するので最後)
+print("J3 (270度) -> 40度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    leg_config.set_angle(group_id, "j3", 30)
+    leg_config.set_angle(group_id, "j3", 40)
     time.sleep(0.3)
 
 input("\n収納姿勢になりました。Enterで終了 (サーボの保持トルクが切れる)")
