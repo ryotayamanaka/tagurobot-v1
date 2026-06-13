@@ -16,7 +16,10 @@ import time
 import leg_config
 
 # 中立角度 (rest 状態)
-J2_NEUTRAL = 90
+# J2 は 270° 化に伴い中立を物理中央 135° に変更 (旧 90° から +45°)。
+# 立ち姿勢・準備姿勢などは中立からの相対量 (LIFT_DEGREES 等) で表すので、
+# この中立値を変えるだけで物理的な動きは従来と同じになる。
+J2_NEUTRAL = 135
 J3_NEUTRAL = 135
 
 # 立ち姿勢

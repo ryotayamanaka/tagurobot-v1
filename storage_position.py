@@ -3,7 +3,7 @@
 しまう時にコンパクトな姿勢にする。
 
   J1 (180度) -> 90度  (中央)
-  J2 (180度) -> 165度  (上限180度に余裕を持たせた値、オフセットで超えないように)
+  J2 (270度) -> 210度 (折りたたみ: 旧180°サーボの165°と同じ物理向き = 中立135+75)
   J3 (270度) -> 30度
 """
 import time
@@ -19,10 +19,10 @@ for group_id in leg_config.CONNECTED_LEGS:
     leg_config.set_angle(group_id, "j1", 90)
     time.sleep(0.3)
 
-# 次に J2 を 165度に (180度サーボの上限180度から余裕を持たせる)
-print("J2 (180度) -> 165度 (オフセット適用済み)")
+# 次に J2 を 210度に (中立135 + 75。270度サーボなので上限270に余裕あり)
+print("J2 (270度) -> 210度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    leg_config.set_angle(group_id, "j2", 165)
+    leg_config.set_angle(group_id, "j2", 210)
     time.sleep(0.3)
 
 # 最後に J3 を 30度に (大きく回転するので最後)

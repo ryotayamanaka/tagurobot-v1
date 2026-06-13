@@ -4,7 +4,7 @@
 組み立て時のホーン取付角度と同じ位置に動かす。
 
   J1 (180度) -> 90度  (物理中央)
-  J2 (180度) -> 0度   (組み立て位置)
+  J2 (270度) -> 45度  (組み立て位置: 旧180°サーボの0°と同じ物理向き = 中立135-90)
   J3 (270度) -> 225度 (組み立て位置)
 """
 import time
@@ -21,10 +21,10 @@ for group_id in leg_config.CONNECTED_LEGS:
     print(f"  脚{leg_config.leg_name(group_id)} (#1 ch{ch}) -> {actual}度")
     time.sleep(0.3)
 
-print("J2 (180度) -> 0度 (オフセット適用済み)")
+print("J2 (270度) -> 45度 (組み立て位置, オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
     ch = leg_config.get_j2_channel(group_id)
-    actual = leg_config.set_angle(group_id, "j2", 0)
+    actual = leg_config.set_angle(group_id, "j2", 45)
     print(f"  脚{leg_config.leg_name(group_id)} (#1 ch{ch}) -> {actual}度")
     time.sleep(0.3)
 

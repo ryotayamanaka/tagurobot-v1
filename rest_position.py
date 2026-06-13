@@ -3,7 +3,7 @@
 組み立て後の動作確認や、何か実行する前の初期姿勢として使う。
 
   J1 (180度) -> 90度  (中央)
-  J2 (180度) -> 90度  (中央)
+  J2 (270度) -> 135度 (物理中央)
   J3 (270度) -> 135度 (物理中央)
 """
 import time
@@ -19,9 +19,9 @@ for group_id in leg_config.CONNECTED_LEGS:
     leg_config.set_angle(group_id, "j3", 135)
     time.sleep(0.2)
 
-print("J2 -> 90度 (オフセット適用済み)")
+print("J2 -> 135度 (物理中央, オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    leg_config.set_angle(group_id, "j2", 90)
+    leg_config.set_angle(group_id, "j2", 135)
     time.sleep(0.2)
 
 print("J1 -> 90度 (オフセット適用済み)")
