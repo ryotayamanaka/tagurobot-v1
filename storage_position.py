@@ -3,7 +3,7 @@
 しまう時にコンパクトな姿勢にする。
 
   J1 (180度) -> 90度  (中央)
-  J2 (270度) -> 220度 (折りたたみ: 中立135+85。実機で一番きれいに収まった値)
+  J2 (270度) -> 230度 (折りたたみ: 中立135+95。実機で一番きれいに収まった値)
   J3 (270度) -> 40度  (実機で一番きれいに収まった値)
 """
 import time
@@ -19,10 +19,10 @@ for group_id in leg_config.CONNECTED_LEGS:
     leg_config.set_angle(group_id, "j1", 90)
     time.sleep(0.3)
 
-# 次に J2 を 220度に (中立135 + 85。実機で一番きれいに収まった値)
-print("J2 (270度) -> 220度 (オフセット適用済み)")
+# 次に J2 を 230度に (中立135 + 95。実機で一番きれいに収まった値)
+print("J2 (270度) -> 230度 (オフセット適用済み)")
 for group_id in leg_config.CONNECTED_LEGS:
-    leg_config.set_angle(group_id, "j2", 220)
+    leg_config.set_angle(group_id, "j2", 230)
     time.sleep(0.3)
 
 # 最後に J3 を 40度に (大きく回転するので最後)
