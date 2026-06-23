@@ -30,10 +30,9 @@ import json
 import os
 
 # 現在物理的に接続されている脚 (group_id のリスト)
-# 1脚目: 脚A (group_id=0)
-# 2脚目: 脚C (group_id=2)
-# 3脚目: 脚E (group_id=4)
-CONNECTED_LEGS = [0, 2, 4]
+# 6脚フル接続: A=0, B=1, C=2, D=3, E=4, F=5
+# B,D,F は飛び番チャネルを埋める: B=ch1系, D=ch3系, F=ch5系
+CONNECTED_LEGS = [0, 1, 2, 3, 4, 5]
 
 # I2C アドレス
 PCA1_ADDRESS = 0x40  # J3 (ch0-5) + J2 (ch6-11)
