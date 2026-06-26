@@ -38,7 +38,7 @@ LONG3 = 0.08               # J3-足先 リンク長
 
 # --- 歩行パラメータ (main.py timer_func と同じ既定値) ---
 NUM_DIVIDE = 100           # 1 周期の分割数 (大きいほど小刻み)
-STROKE_LENGTH_A = 0.01     # 一歩の歩幅 (m)  ※初回は足踏み確認のため小さめ。安全確認後 0.03 へ
+STROKE_LENGTH_A = 0.03     # 一歩の歩幅 (m)  ※オリジナル既定値。足踏み(0.01)確認済み
 STROKE_LENGTH_B = 0.01     # 一歩の足上げ高さ (m)
 DISTANCE_A = 0.1           # TOP VIEW で J1 から足先定位置までの距離 (m)
 DISTANCE_B = -0.08         # SIDE VIEW で関節から地面までの距離 (m)
